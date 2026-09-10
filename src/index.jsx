@@ -1,160 +1,108 @@
-import { useEffect, useState } from "react";
-import "./calculator.css";
+import { useState } from "react";
+import "./attendance.css";
 
-function calculator() {
-  const [display, setDisplay] = useState("0");
+function attendance() {
+  const students = [
+    "Praveen",
+    "Rahul",
+    "Dhasarathi",
+    "Parasuraman",
+    "Venkatasaarathi",
+    "Kalee",
+    "Vimal",
+    "Bragadeesh",
+    "Mani",
+    "Varun",
+    "Chakaravathy",
+    "Peter",
+    "Sathya",
+    "Mukunth Varadha Rajan",
+    "Raghu",
+    "Sakthivel",
+    "SK",
+    "Arumpon",
+    "Arivazhagan",
+    "Bospandi"
+  ];
+  const [attendance, setAttendance] = useState(
+    Array(20).fill(null)
+  );
 
-  const calculate = (value) => {
-    if (value === "AC") {
-      setDisplay("0");
-      return;
-    }
+  const markAttendance = (index, status) => {
+    const newAttendance = [...attendance];
 
-    if (value === "DEL") {
-      setDisplay((prev) =>
-        prev.length === 1 ? "0" : prev.slice(0, -1)
-      );
-      return;
-    }
+    newAttendance[index] = status;
 
-    if (value === "=") {
-      try {
-        const expression = display
-          .replace(/×/g, "*")
-          .replace(/÷/g, "/")
-          .replace(/%/g, "/100");
-
-        const result = Function(
-          `"use strict"; return (${expression})`
-        )();
-
-        setDisplay(String(result));
-      } catch {
-        setDisplay("Error");
-      }
-
-      return;
-    }
-
-    if (display === "Error") {
-      setDisplay(value);
-      return;
-    }
-
-    if (
-      display === "0" &&
-      !["+", "-", "×", "÷", "%", "."].includes(value)
-    ) {
-      setDisplay(value);
-    } else {
-      setDisplay((prev) => prev + value);
-    }
+    setAttendance(newAttendance);
   };
 
-  // Keyboard / Numpad support
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      const key = event.key;
+  // Count Present students
+  const presentCount = attendance.filter(
+    (status) => status === "Present"
+  ).length;
 
-      // Numbers 0-9
-      if (/^[0-9]$/.test(key)) {
-        calculate(key);
-      }
-
-      // Numpad decimal / normal decimal
-      else if (key === "." || key === "Decimal") {
-        calculate(".");
-      }
-
-      // Operators
-      else if (key === "+") {
-        calculate("+");
-      }
-
-      else if (key === "-") {
-        calculate("-");
-      }
-
-      else if (key === "*" || key === "Multiply") {
-        calculate("×");
-      }
-
-      else if (key === "/" || key === "Divide") {
-        event.preventDefault();
-        calculate("÷");
-      }
-
-      // Enter = calculate
-      else if (key === "Enter" || key === "=") {
-        calculate("=");
-      }
-
-      // Escape = clear
-      else if (key === "Escape") {
-        calculate("AC");
-      }
-
-      // Backspace = delete
-      else if (key === "Backspace") {
-        calculate("DEL");
-      }
-
-      // Percentage
-      else if (key === "%") {
-        calculate("%");
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [display]);
-
-  const buttons = [
-    "AC", "DEL", "%", "÷",
-    "7", "8", "9", "×",
-    "4", "5", "6", "-",
-    "1", "2", "3", "+",
-    "0", ".", "="
-  ];
+  // Count Absent students
+  const absentCount = attendance.filter(
+    (status) => status === "Absent"
+  ).length;
 
   return (
-    <div className="calculator-container">
-      <div className="calculator">
+    <div className="container">
 
-        <div className="display">
-          {display}
-        </div>
+      <h1>Attendance Tracker</h1>
 
-        <div className="buttons">
-          {buttons.map((button) => (
+      <div className="student-list">
+
+        {students.map((student, index) => (
+          <div className="student" key={index}>
+
+            <h3>
+              {index + 1}. {student}
+            </h3>
+
+            <p>
+              Status:{" "}
+              {attendance[index] === null
+                ? "No Information"
+                : attendance[index]}
+            </p>
+
             <button
-              key={button}
-              onClick={() => calculate(button)}
-              className={`
-                ${button === "=" ? "equals" : ""}
-                ${
-                  ["÷", "×", "-", "+"].includes(button)
-                    ? "operator"
-                    : ""
-                }
-                ${
-                  ["AC", "DEL", "%"].includes(button)
-                    ? "special"
-                    : ""
-                }
-              `}
+              onClick={() =>
+                markAttendance(index, "Present")
+              }
             >
-              {button}
+              Present
             </button>
-          ))}
-        </div>
+
+            <button
+              onClick={() =>
+                markAttendance(index, "Absent")
+              }
+            >
+              Absent
+            </button>
+
+          </div>
+        ))}
 
       </div>
+
+      <div className="result">
+
+        <h2>Attendance Summary</h2>
+
+        <p>Total Students: {students.length}</p>
+
+        <p>Total Present: {presentCount}</p>
+
+        <p>Total Absent: {absentCount}</p>
+
+      </div>
+
     </div>
   );
 }
 
-export default calculator
+export default attendance;
+
